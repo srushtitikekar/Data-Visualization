@@ -10,19 +10,21 @@ d3.csv("dataset.csv").then(
             element.insulin = +element['Insulin']
             element.after = +element['Lbxglt(Glucose after 2 hr)']
             element.diabetes = element['Diabetes Diagnosis Status']
+            element.seqn = +element['Seqn']
+            
 
         });
 
         var dimensions = {
-            width: 1000,
-            height: 600,
+            width: 1200,
+            height: 800,
             margin:{
                 top:10,
                 bottom: 10,
                 right: 10,
                 left: 50
             },
-            plotHeight:150
+            plotHeight:200
         }
 
         var xAccessor = d=>d.bmi
@@ -33,7 +35,7 @@ d3.csv("dataset.csv").then(
         };
         //console.log(xAccessor)
 
-        var svg = d3.select("#insulin")
+        var svg = d3.select("#chart1")
                     .style("width",dimensions.width)
                     .style("height",dimensions.height);
         
@@ -66,21 +68,21 @@ d3.csv("dataset.csv").then(
         
         //.range(["#e41a1c", "#377eb8", "#a6cee3"]);
         var xScale = d3.scaleLinear()
-        .domain([d3.min(dataset, xAccessor) - 1, d3.max(dataset, xAccessor) + 1])
+        .domain([d3.min(dataset, xAccessor) - 1, d3.max(dataset, xAccessor) + 5])
         .range([dimensions.margin.left, dimensions.width - dimensions.margin.right]);
 
 
         var yScales = {
             insulin: d3.scaleLinear()
-                .domain([0, d3.max(dataset, yAccessors.insulin) + 50])
+                .domain([0, d3.max(dataset, yAccessors.insulin) + 5])
                 .range([dimensions.plotHeight - dimensions.margin.bottom, dimensions.margin.top]),
             
             fasting: d3.scaleLinear()
-                .domain([0, d3.max(dataset, yAccessors.fasting) + 50])
+                .domain([0, d3.max(dataset, yAccessors.fasting) + 5])
                 .range([dimensions.plotHeight - dimensions.margin.bottom, dimensions.margin.top]),
             
             after: d3.scaleLinear()
-                .domain([0, d3.max(dataset, yAccessors.after) + 50])
+                .domain([0, d3.max(dataset, yAccessors.after) + 5])
                 .range([dimensions.plotHeight - dimensions.margin.bottom, dimensions.margin.top])
         };
         
@@ -149,14 +151,83 @@ d3.csv("dataset.csv").then(
 
 
 
+        // ["fasting", "after", "insulin"].forEach((measure, index) => {
+        //     const yScale = yScales[measure];
+        //     const yAccessor = yAccessors[measure];
+    
+        //     // Create a group for each scatter plot
+        //     const plotGroup = svg.append("g")
+        //         .attr("transform", `translate(0, ${index * dimensions.plotHeight})`);
+    
+        //     // Add separator line, except after the last plot
+        //     if (index < 2) { // Only add lines after the first and second plots
+        //         svg.append("line")
+        //             .attr("x1", dimensions.margin.left)
+        //             .attr("x2", dimensions.width - dimensions.margin.right)
+        //             .attr("y1", (index + 1) * dimensions.plotHeight)
+        //             .attr("y2", (index + 1) * dimensions.plotHeight)
+        //             .attr("stroke", "gray")
+        //             .attr("stroke-width", 1)
+        //             .attr("stroke-dasharray", "4,4"); // Optional: dashed line
+        //     }
+    
+        //     // Add X-axis (only to the bottom plot)
+        //     if (measure === "insulin") {
+        //         plotGroup.append("g")
+        //             .attr("transform", `translate(0,${dimensions.plotHeight - dimensions.margin.bottom})`)
+        //             .call(d3.axisBottom(xScale))
+        //             .append("text")
+        //             .attr("x", dimensions.width / 2)
+        //             .attr("y", 35)
+        //             .attr("fill", "black")
+        //             .style("text-anchor", "middle")
+        //             .text("BMI");
+        //     }
+    
+        //     // Add Y-axis
+        //     plotGroup.append("g")
+        //         .attr("transform", `translate(${dimensions.margin.left},0)`)
+        //         .call(d3.axisLeft(yScale))
+        //         .append("text")
+        //         .attr("x", -dimensions.plotHeight / 2)
+        //         .attr("y", -35)
+        //         .attr("fill", "black")
+        //         .attr("transform", "rotate(-90)")
+        //         .style("text-anchor", "middle")
+        //         .text(measure === "insulin" ? "Insulin Level" : (measure === "fasting" ? "Fasting Blood Glucose" : "2-Hour Postprandial Blood Glucose"));
+    
+        //     // Plot data points for each measure with colors based on diabetes status
+        //     plotGroup.selectAll("circle")
+        //         .data(dataset)
+        //         .enter()
+        //         .append("circle")
+        //         .attr("cx", d => xScale(xAccessor(d)))
+        //         .attr("cy", d => yScale(yAccessor(d)))
+        //         .attr("r", 4)
+        //         .style("fill", d => colorScale(d.diabetes)) // Color by diabetes status
+        //         .style("opacity", 0.7);
+        // });
+    
         ["fasting", "after", "insulin"].forEach((measure, index) => {
             const yScale = yScales[measure];
             const yAccessor = yAccessors[measure];
-    
+        
             // Create a group for each scatter plot
             const plotGroup = svg.append("g")
                 .attr("transform", `translate(0, ${index * dimensions.plotHeight})`);
-    
+        
+            // Add separator line, except after the last plot
+            if (index < 2) {
+                svg.append("line")
+                    .attr("x1", dimensions.margin.left)
+                    .attr("x2", dimensions.width - dimensions.margin.right)
+                    .attr("y1", (index + 1) * dimensions.plotHeight)
+                    .attr("y2", (index + 1) * dimensions.plotHeight)
+                    .attr("stroke", "gray")
+                    .attr("stroke-width", 1)
+                    .attr("stroke-dasharray", "4,4");
+            }
+        
             // Add X-axis (only to the bottom plot)
             if (measure === "insulin") {
                 plotGroup.append("g")
@@ -169,7 +240,7 @@ d3.csv("dataset.csv").then(
                     .style("text-anchor", "middle")
                     .text("BMI");
             }
-    
+        
             // Add Y-axis
             plotGroup.append("g")
                 .attr("transform", `translate(${dimensions.margin.left},0)`)
@@ -181,7 +252,7 @@ d3.csv("dataset.csv").then(
                 .attr("transform", "rotate(-90)")
                 .style("text-anchor", "middle")
                 .text(measure === "insulin" ? "Insulin Level" : (measure === "fasting" ? "Fasting Blood Glucose" : "2-Hour Postprandial Blood Glucose"));
-    
+        
             // Plot data points for each measure with colors based on diabetes status
             plotGroup.selectAll("circle")
                 .data(dataset)
@@ -191,8 +262,44 @@ d3.csv("dataset.csv").then(
                 .attr("cy", d => yScale(yAccessor(d)))
                 .attr("r", 4)
                 .style("fill", d => colorScale(d.diabetes)) // Color by diabetes status
-                .style("opacity", 0.7);
+                .style("opacity", 0.7)
+                .attr("class", d => `point-seqn-${d.seqn}`) // Use unique seqn for linking
+                .on("mouseover", function(event, d) {
+                    // Highlight only the hovered point
+                    d3.selectAll(`.point-seqn-${d.seqn}`)
+                        .style("stroke", "black")
+                        .style("stroke-width", 2)
+                        .attr("r", 6);
+                })
+                .on("mouseout", function(event, d) {
+                    // Reset the highlight of the hovered point
+                    d3.selectAll("circle")
+                        .style("stroke", "none")
+                        .style("fill", d => colorScale(d.diabetes)) // Reset color
+                        .attr("r", 4)
+                        .style("opacity",0.7)
+                      // Reset the radius
+                })
+                .on("click", function(event, d) {
+                    // Print the seqn of the clicked point for debugging
+                    console.log("Clicked seqn:", d.Seqn);
+                
+                    // Clear previous highlights
+                    d3.selectAll("circle")
+                        .style("stroke", "none")
+                        .style("fill", d => colorScale(d.diabetes)) // Reset color
+                        .attr("r", 4)
+                        .style("opacity",0.3);
+                
+                    // Highlight all points with the same seqn
+                    d3.selectAll(`.point-seqn-${d.seqn}`)
+                        .style("stroke", "black")
+                        .style("stroke-width", 2) // Full opacity for highlighted points
+                        .style("opacity",1)
+                        .attr("r", 6); // Increase the radius for highlight
+                });
         });
+        
     
         // Legend setup (only once, outside of individual plots)
         var legend = svg.selectAll(".legend")
