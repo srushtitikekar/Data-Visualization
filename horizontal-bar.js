@@ -118,9 +118,16 @@ d3.csv("dataset.csv").then(function(dataset) {
 
             // Emit a custom event with the selected age group
             const selectedAgeGroup = d.data.AgeGroup;
-            const eventDetail = { detail: { ageGroup: selectedAgeGroup } };
+            const selectedExercise = d3.select(this.parentNode).datum().key;
+            const eventDetail = { 
+                detail: { 
+                    ageGroup: selectedAgeGroup, 
+                    exerciseType: selectedExercise 
+                } 
+            };
             window.dispatchEvent(new CustomEvent("ageGroupSelected", eventDetail));
             console.log(selectedAgeGroup)
+            console.log(selectedExercise)
             console.log(eventDetail)
         });
 
