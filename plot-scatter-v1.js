@@ -8,6 +8,7 @@ d3.csv("dataset.csv").then(function (dataset) {
         element.insulin = +element['Insulin'];
         element.after = +element['Lbxglt(Glucose after 2 hr)'];
         element.diabetes = element['Diabetes Diagnosis Status'];
+        element.seqn = +element['Seqn'];
     });
 
     // Function to categorize age into groups
@@ -66,7 +67,7 @@ d3.csv("dataset.csv").then(function (dataset) {
 
     function renderScatterPlot(filteredData) {
         // Clear existing points
-        svg.selectAll("circle").remove();
+        svg.selectAll("g").remove();
 
         // Render scatter plots for each measure
         ["fasting", "after", "insulin"].forEach((measure, index) => {
@@ -122,9 +123,35 @@ d3.csv("dataset.csv").then(function (dataset) {
                 .attr("cx", d => xScale(xAccessor(d)))
                 .attr("cy", d => yScale(yAccessor(d)))
                 .attr("r", 4)
-                .style("fill", d => colorScale(d.diabetes)) // Color by diabetes status
+                .style("fill", d => colorScale(d.diabetes))
                 .style("opacity", 0.7)
-                .attr("class", d => `point-seqn-${d.seqn}`);
+                .attr("class", d => `point-seqn-${d.seqn}`)
+                .on("mouseover", function(event, d) {
+                    d3.selectAll(`.point-seqn-${d.seqn}`)
+                        .style("stroke", "black")
+                        .style("stroke-width", 2)
+                        .attr("r", 6);
+                })
+                .on("mouseout", function(event, d) {
+                    d3.selectAll("circle")
+                        .style("stroke", "none")
+                        .style("fill", d => colorScale(d.diabetes))
+                        .attr("r", 4)
+                        .style("opacity", 0.7);
+                })
+                .on("click", function(event, d) {
+                    console.log("Clicked seqn:", d.seqn);
+                    d3.selectAll("circle")
+                        .style("stroke", "none")
+                        .style("fill", d => colorScale(d.diabetes))
+                        .attr("r", 4)
+                        .style("opacity", 0.3);
+                    d3.selectAll(`.point-seqn-${d.seqn}`)
+                        .style("stroke", "black")
+                        .style("stroke-width", 2)
+                        .style("opacity", 1)
+                        .attr("r", 6);
+                });
         });
     }
 
@@ -136,10 +163,11 @@ d3.csv("dataset.csv").then(function (dataset) {
         const selectedAgeGroup = event.detail.ageGroup;
         const selectedExercise = event.detail.exerciseType;
 
-        // Filter dataset based on the selected age group
-        const filteredData = dataset.filter(d => d.ageGroup === selectedAgeGroup && d.vigorous === selectedExercise);
+        // Filter dataset based on the selected age group and exercise type
+        const filteredData = dataset.filter(
+            d => d.ageGroup === selectedAgeGroup && d.vigorous.trim().toLowerCase() === selectedExercise.trim().toLowerCase()
+        );
 
-        // Render the scatter plot with the filtered data
         renderScatterPlot(filteredData);
     });
 });
